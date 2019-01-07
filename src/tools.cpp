@@ -4,6 +4,9 @@
 using Eigen::VectorXd;
 using Eigen::MatrixXd;
 using std::vector;
+using std::endl;
+using std::cout;
+using std::fabs;
 
 Tools::Tools() {}
 
@@ -21,7 +24,7 @@ VectorXd Tools::CalculateRMSE(const vector<VectorXd> &estimations,
     return rmse;
   }
   
-  for(int i=0;i<estimations.size();++i){
+  for(unsigned int i=0;i<estimations.size();++i){
     VectorXd residual = estimations[i] - ground_truth[i];
     residual  = residual.array() * residual.array();
     rmse += residual;
@@ -42,14 +45,14 @@ MatrixXd Tools::CalculateJacobian(const VectorXd& x_state) {
   float vx = x_state(2);
   float vy = x_state(3);
   
-  px_py = (px * px) + (py * py);
-  root = sqrt(px_py);
-  px_by_root = px/root;
-  py_by_root = py/root;
-  px_by_pxpy = px / px_py;
-  py_by_pxpy = py / px_py;
+  float px_py = (px * px) + (py * py);
+  float root = sqrt(px_py);
+  float px_by_root = px/root;
+  float py_by_root = py/root;
+  float px_by_pxpy = px / px_py;
+  float py_by_pxpy = py / px_py;
   
-  if(fbs(px_py) < 0.0001){
+  if(fabs(px_py) < 0.0001){
      cout<<"Divide By Zero Error"<<endl;
      return Hj;
   }
