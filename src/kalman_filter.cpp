@@ -1,8 +1,9 @@
 #include "kalman_filter.h"
-
+#include <iostream>
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
-
+using std::cout;
+using std::endl;
 /* 
  * Please note that the Eigen library does not initialize 
  *   VectorXd or MatrixXd objects with zeros upon creation.
@@ -26,6 +27,15 @@ void KalmanFilter::Predict() {
   /**
    * TODO: predict the state
    */
+  cout<<"IN PREDICT"<<endl;
+  cout<<"X_ "<<endl;
+  std::cout << x_ << std::endl;
+  cout<<"F_ "<<endl;
+  std::cout << F_ << std::endl;
+  cout<<"P_ "<<endl;
+  std::cout << P_ << std::endl;
+  cout<<"FT_ "<<endl;
+  std::cout << F_.transpose() << std::endl;
   x_ = F_ * x_;
   MatrixXd Ft = F_.transpose();
   P_ = F_ * P_ * Ft + Q_;
@@ -35,15 +45,42 @@ void KalmanFilter::Update(const VectorXd &z) {
   /**
    * TODO: update the state by using Kalman Filter equations
    */
+  cout<<"IN UPDATE"<<endl;
+  cout<<"X_ "<<endl;
+  std::cout << x_ << std::endl;
+  cout<<"H_ "<<endl;
+  std::cout << H_ << std::endl;
+  
   VectorXd z_pred = H_ * x_;
+  
+  cout<<"Z_ "<<endl;
+  std::cout << z << std::endl;
+  cout<<"z_pred_ "<<endl;
+  std::cout << z_pred << std::endl;
+  
   VectorXd y = z - z_pred;
   MatrixXd Ht = H_.transpose();
+  cout<<"Ht "<<endl;
+  std::cout << Ht << std::endl;
+  cout<<"P_ "<<endl;
+  std::cout << P_ << std::endl;
+  cout<<"R_ "<<endl;
+  std::cout << R_ << std::endl;
   MatrixXd S = H_ * P_ * Ht + R_;
   MatrixXd Si = S.inverse();
+  cout<<"S "<<endl;
+  std::cout << S << std::endl;
+  cout<<"Si "<<endl;
+  std::cout << Si << std::endl;
   MatrixXd PHt = P_ * Ht;
+  cout<<"PHt "<<endl;
+  std::cout << PHt << std::endl;
   MatrixXd K = PHt * Si;
-
+  cout<<"K "<<endl;
+  std::cout << K << std::endl;
   //new estimate
+  cout<<"y "<<endl;
+  std::cout << y << std::endl;
   x_ = x_ + (K * y);
   long x_size = x_.size();
   MatrixXd I = MatrixXd::Identity(x_size, x_size);
@@ -54,4 +91,5 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   /**
    * TODO: update the state by using Extended Kalman Filter equations
    */
+  return;
 }
