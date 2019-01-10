@@ -50,7 +50,7 @@ void KalmanFilter::Update(const VectorXd &z) {
   /**
    * TODO: update the state by using Kalman Filter equations
    */
-  cout<<"IN UPDATE"<<endl;
+  cout<<"IN UPDATE######################"<<endl;
   cout<<"X_ "<<endl;
   std::cout << x_ << std::endl;
   cout<<"H_ "<<endl;
@@ -96,28 +96,55 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   /**
    * TODO: update the state by using Extended Kalman Filter equations
    */
-  cout<<"IN UPDATE-EKF"<<endl;
-  
-  VectorXd z_pred = VectorXd(3);
-  float px = x_[0];
-  float py = x_[1];
-  float vx = x_[2];
-  float vy = x_[3];
+  cout<<"IN UPDATE-EKF@@@@@@@@@@@@@@@@@@"<<endl;
+  cout<<"x_ "<<endl;
+  std::cout << x_ << std::endl;
+  float px = x_(0);
+  float py = x_(1);
+  float vx = x_(2);
+  float vy = x_(3);
   float rho = sqrt(px * px + py * py);
-  float phi = atan2(py,px) * 180 / PI;
-  float rho_dot = (px*vx + py*vy) / sqrt(px * px + py * py);
+  float phi = atan2(py,px);
+  float rho_dot = 0;
+  if(fabs(rho) >= 0.0001){
+     rho_dot = (px*vx + py*vy) / rho;
+  }
+  VectorXd z_pred = VectorXd(3);
   z_pred << rho, phi, rho_dot;
+  cout<<"z_pred "<<endl;
+  std::cout << z_pred << std::endl;
+  cout<<"z "<<endl;
+  std::cout << z << std::endl;
   VectorXd y = z - z_pred;
+  cout<<"y "<<endl;
+  std::cout << y << std::endl;
+  cout<<"H_ "<<endl;
+  std::cout << H_ << std::endl;
   MatrixXd Ht = H_.transpose();
+  cout<<"P_ "<<endl;
+  std::cout << P_ << std::endl;
+  cout<<"R_ "<<endl;
+  std::cout << R_ << std::endl;
   MatrixXd S = H_ * P_ * Ht + R_;
+  cout<<"S "<<endl;
+  std::cout << S << std::endl;
   MatrixXd Si = S.inverse();
+  cout<<"Si "<<endl;
+  std::cout << Si << std::endl;
   MatrixXd PHt = P_ * Ht;
+  cout<<"PHt "<<endl;
+  std::cout << PHt << std::endl;
   MatrixXd K = PHt * Si;
-  
+  cout<<"K "<<endl;
+  std::cout << K << std::endl;
   //new estimate
   std::cout << y << std::endl;
   x_ = x_ + (K * y);
+  cout<<"x_ AGAIN "<<endl;
+  std::cout << x_ << std::endl;
   long x_size = x_.size();
   MatrixXd I = MatrixXd::Identity(x_size, x_size);
   P_ = (I - K * H_) * P_;
+  cout<<"P_ AGAIN "<<endl;
+  std::cout << P_ << std::endl;
 }
