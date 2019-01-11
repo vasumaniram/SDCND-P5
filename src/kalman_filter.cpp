@@ -32,15 +32,6 @@ void KalmanFilter::Predict() {
   /**
    * TODO: predict the state
    */
-  cout<<"IN PREDICT"<<endl;
-  cout<<"X_ "<<endl;
-  std::cout << x_ << std::endl;
-  cout<<"F_ "<<endl;
-  std::cout << F_ << std::endl;
-  cout<<"P_ "<<endl;
-  std::cout << P_ << std::endl;
-  cout<<"FT_ "<<endl;
-  std::cout << F_.transpose() << std::endl;
   x_ = F_ * x_;
   MatrixXd Ft = F_.transpose();
   P_ = F_ * P_ * Ft + Q_;
@@ -50,101 +41,50 @@ void KalmanFilter::Update(const VectorXd &z) {
   /**
    * TODO: update the state by using Kalman Filter equations
    */
-  cout<<"IN UPDATE######################"<<endl;
-  cout<<"X_ "<<endl;
-  std::cout << x_ << std::endl;
-  cout<<"H_ "<<endl;
-  std::cout << H_ << std::endl;
-  
-  VectorXd z_pred = H_ * x_;
-  
-  cout<<"Z_ "<<endl;
-  std::cout << z << std::endl;
-  cout<<"z_pred_ "<<endl;
-  std::cout << z_pred << std::endl;
-  
-  VectorXd y = z - z_pred;
-  MatrixXd Ht = H_.transpose();
-  cout<<"Ht "<<endl;
-  std::cout << Ht << std::endl;
-  cout<<"P_ "<<endl;
-  std::cout << P_ << std::endl;
-  cout<<"R_ "<<endl;
-  std::cout << R_ << std::endl;
-  MatrixXd S = H_ * P_ * Ht + R_;
-  MatrixXd Si = S.inverse();
-  cout<<"S "<<endl;
-  std::cout << S << std::endl;
-  cout<<"Si "<<endl;
-  std::cout << Si << std::endl;
-  MatrixXd PHt = P_ * Ht;
-  cout<<"PHt "<<endl;
-  std::cout << PHt << std::endl;
-  MatrixXd K = PHt * Si;
-  cout<<"K "<<endl;
-  std::cout << K << std::endl;
-  //new estimate
-  cout<<"y "<<endl;
-  std::cout << y << std::endl;
-  x_ = x_ + (K * y);
-  long x_size = x_.size();
-  MatrixXd I = MatrixXd::Identity(x_size, x_size);
-  P_ = (I - K * H_) * P_;
+  VectorXd z_pred = getPredictedState("LASER");
+  Update(z,z_pred);
 }
 
 void KalmanFilter::UpdateEKF(const VectorXd &z) {
   /**
    * TODO: update the state by using Extended Kalman Filter equations
    */
-  cout<<"IN UPDATE-EKF@@@@@@@@@@@@@@@@@@"<<endl;
-  cout<<"x_ "<<endl;
-  std::cout << x_ << std::endl;
-  float px = x_(0);
-  float py = x_(1);
-  float vx = x_(2);
-  float vy = x_(3);
-  float rho = sqrt(px * px + py * py);
-  float phi = atan2(py,px);
-  float rho_dot = 0;
-  if(fabs(rho) >= 0.0001){
-     rho_dot = (px*vx + py*vy) / rho;
-  }
-  VectorXd z_pred = VectorXd(3);
-  z_pred << rho, phi, rho_dot;
-  cout<<"z_pred "<<endl;
-  std::cout << z_pred << std::endl;
-  cout<<"z "<<endl;
-  std::cout << z << std::endl;
+  VectorXd z_pred = getPredictedState("RADAR");
+  Update(z,z_pred);
+}
+
+void KalmanFilter::Update(const VectorXd &z,const VectorXd &z_pred){
   VectorXd y = z - z_pred;
-  cout<<"y "<<endl;
-  std::cout << y << std::endl;
-  cout<<"H_ "<<endl;
-  std::cout << H_ << std::endl;
   MatrixXd Ht = H_.transpose();
-  cout<<"P_ "<<endl;
-  std::cout << P_ << std::endl;
-  cout<<"R_ "<<endl;
-  std::cout << R_ << std::endl;
   MatrixXd S = H_ * P_ * Ht + R_;
-  cout<<"S "<<endl;
-  std::cout << S << std::endl;
   MatrixXd Si = S.inverse();
-  cout<<"Si "<<endl;
-  std::cout << Si << std::endl;
   MatrixXd PHt = P_ * Ht;
-  cout<<"PHt "<<endl;
-  std::cout << PHt << std::endl;
   MatrixXd K = PHt * Si;
-  cout<<"K "<<endl;
-  std::cout << K << std::endl;
   //new estimate
-  std::cout << y << std::endl;
   x_ = x_ + (K * y);
-  cout<<"x_ AGAIN "<<endl;
-  std::cout << x_ << std::endl;
   long x_size = x_.size();
   MatrixXd I = MatrixXd::Identity(x_size, x_size);
   P_ = (I - K * H_) * P_;
-  cout<<"P_ AGAIN "<<endl;
-  std::cout << P_ << std::endl;
 }
+
+Eigen::VectorXd KalmanFilter::getPredictedState(const std::string sensorType){
+  VectorXd z_pred;
+    if (sensorType == "RADAR"){
+        float px = x_(0);
+        float py = x_(1);
+        float vx = x_(2);
+        float vy = x_(3);
+        float rho = sqrt(px * px + py * py);
+        float phi = atan2(py,px);
+        float rho_dot = 0;
+        if(fabs(rho) >= 0.0001){
+           rho_dot = (px*vx + py*vy) / rho;
+        }
+        z_pred = VectorXd(3);
+        z_pred << rho, phi, rho_dot;
+    } else if(sensorType == "LASER"){
+        z_pred = H_ * x_;
+    }
+    return z_pred;
+}
+

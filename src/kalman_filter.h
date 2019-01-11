@@ -45,6 +45,15 @@ class KalmanFilter {
    * @param z The measurement at k+1
    */
   void UpdateEKF(const Eigen::VectorXd &z);
+  /**
+   * A common Kalman / Extended Kalman Update Algorithm
+   */
+  void Update(const Eigen::VectorXd &z,const Eigen::VectorXd &z_pred);
+  /**
+   * A function which maps the state into measurement space based on the 
+   * sensor type
+   */
+  Eigen::VectorXd getPredictedState(const std::string sensorType);
 
   // state vector
   Eigen::VectorXd x_;
