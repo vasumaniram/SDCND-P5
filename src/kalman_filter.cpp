@@ -86,6 +86,6 @@ Eigen::VectorXd KalmanFilter::GetPredictedStateForRadar(){
 
 void KalmanFilter::NormalizeAngle(double& phi)
 {
-    atan2(sin(phi), cos(phi));
+    phi = atan2(sin(phi), cos(phi));
 }
 
