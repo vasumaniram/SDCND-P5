@@ -40,7 +40,8 @@ void KalmanFilter::Update(const VectorXd &z) {
    * TODO: update the state by using Kalman Filter equations
    */
   const VectorXd z_pred = H_ * x_;
-  Update(z,z_pred);
+  const VectorXd y = z - z_pred;
+  UpdateStateAndPosition(y);
 }
 
 void KalmanFilter::UpdateEKF(const VectorXd &z) {
@@ -48,12 +49,12 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
    * TODO: update the state by using Extended Kalman Filter equations
    */
   const VectorXd z_pred = GetPredictedStateForRadar();
-  Update(z,z_pred);
+  VectorXd y = z - z_pred;
+  NormalizeAngle(y(1));
+  UpdateStateAndPosition(y);
 }
 
-void KalmanFilter::Update(const VectorXd &z,const VectorXd &z_pred){
-  const VectorXd y = z - z_pred;
-  NormalizeAngle(y(1));
+void KalmanFilter::UpdateStateAndPosition(const VectorXd &y){
   const MatrixXd Ht = H_.transpose();
   const MatrixXd S = H_ * P_ * Ht + R_;
   const MatrixXd Si = S.inverse();
@@ -73,7 +74,7 @@ Eigen::VectorXd KalmanFilter::GetPredictedStateForRadar(){
         const float vx = x_(2);
         const float vy = x_(3);
         const float rho = sqrt(px * px + py * py);
-        const float phi = atan2(py,px);
+        float phi = atan2(py,px);
         float rho_dot = 0;
         if(fabs(rho) >= 0.0001){
            rho_dot = (px*vx + py*vy) / rho;
@@ -85,6 +86,6 @@ Eigen::VectorXd KalmanFilter::GetPredictedStateForRadar(){
 
 void KalmanFilter::NormalizeAngle(double& phi)
 {
-    phi = atan2(sin(phi), cos(phi));
+    atan2(sin(phi), cos(phi));
 }
 

@@ -48,7 +48,7 @@ class KalmanFilter {
   /**
    * A common Kalman / Extended Kalman Update Algorithm
    */
-  void Update(const Eigen::VectorXd &z,const Eigen::VectorXd &z_pred);
+  void UpdateStateAndPosition(const Eigen::VectorXd &y);
   /**
    * A function which maps the state into measurement space based on the 
    * sensor type
