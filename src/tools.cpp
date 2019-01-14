@@ -54,6 +54,9 @@ MatrixXd Tools::CalculateJacobian(const VectorXd& x_state) {
   
   if(fabs(px_py) < 0.0001){
      cout<<"Divide By Zero Error"<<endl;
+     Hj << 0,0,0,0,
+           0,0,0,0,
+           0,0,0,0;
      return Hj;
   }
   Hj << px_by_root,py_by_root,0,0,

@@ -53,7 +53,12 @@ class KalmanFilter {
    * A function which maps the state into measurement space based on the 
    * sensor type
    */
-  Eigen::VectorXd getPredictedState(const std::string sensorType);
+  Eigen::VectorXd GetPredictedStateForRadar();
+  
+  /**
+   * Normalizing different angle between -PI to +PI
+   */
+  void NormalizeAngle(double& phi);
 
   // state vector
   Eigen::VectorXd x_;

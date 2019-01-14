@@ -76,13 +76,13 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
       // TODO: Convert radar from polar to cartesian coordinates 
       //         and initialize state.
-      float rho = measurement_pack.raw_measurements_(0);
-      float phi = measurement_pack.raw_measurements_(1);
-      float rho_dot = measurement_pack.raw_measurements_(2);
-      float px = rho * cos(phi);
-      float py = rho * sin(phi);
-      float vx = rho_dot * cos(phi);
-      float vy = rho_dot * sin(phi);
+      const float rho = measurement_pack.raw_measurements_(0);
+      const float phi = measurement_pack.raw_measurements_(1);
+      const float rho_dot = measurement_pack.raw_measurements_(2);
+      const float px = rho * cos(phi);
+      const float py = rho * sin(phi);
+      const float vx = rho_dot * cos(phi);
+      const float vy = rho_dot * sin(phi);
       ekf_.x_ << px, py, vx, vy;
     }
     else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
@@ -102,7 +102,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   /**
    * Prediction
    */
-   float dt = (measurement_pack.timestamp_ - previous_timestamp_)/1000000.0;
+   const float dt = (measurement_pack.timestamp_ - previous_timestamp_)/1000000.0;
    previous_timestamp_ = measurement_pack.timestamp_;
   /**
    * TODO: Update the state transition matrix F according to the new elapsed time.
@@ -110,11 +110,11 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
    * TODO: Update the process noise covariance matrix.
    * Use noise_ax = 9 and noise_ay = 9 for your Q matrix.
    */
-  float noise_ax = 9;
-  float noise_ay = 9;
-  float dt_2 = dt * dt;
-  float dt_3 = dt_2 * dt;
-  float dt_4 = dt_3 * dt;
+  const float noise_ax = 9;
+  const float noise_ay = 9;
+  const float dt_2 = dt * dt;
+  const float dt_3 = dt_2 * dt;
+  const float dt_4 = dt_3 * dt;
   
   ekf_.F_(0,2) = dt;
   ekf_.F_(1,3) = dt;

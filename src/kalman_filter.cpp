@@ -7,8 +7,6 @@ using std::cout;
 using std::endl;
 using std::atan2;
 
-#define PI 3.14159265
-
 /* 
  * Please note that the Eigen library does not initialize 
  *   VectorXd or MatrixXd objects with zeros upon creation.
@@ -41,7 +39,7 @@ void KalmanFilter::Update(const VectorXd &z) {
   /**
    * TODO: update the state by using Kalman Filter equations
    */
-  VectorXd z_pred = getPredictedState("LASER");
+  const VectorXd z_pred = H_ * x_;
   Update(z,z_pred);
 }
 
@@ -49,42 +47,44 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   /**
    * TODO: update the state by using Extended Kalman Filter equations
    */
-  VectorXd z_pred = getPredictedState("RADAR");
+  const VectorXd z_pred = GetPredictedStateForRadar();
   Update(z,z_pred);
 }
 
 void KalmanFilter::Update(const VectorXd &z,const VectorXd &z_pred){
-  VectorXd y = z - z_pred;
-  MatrixXd Ht = H_.transpose();
-  MatrixXd S = H_ * P_ * Ht + R_;
-  MatrixXd Si = S.inverse();
-  MatrixXd PHt = P_ * Ht;
-  MatrixXd K = PHt * Si;
+  const VectorXd y = z - z_pred;
+  NormalizeAngle(y(1));
+  const MatrixXd Ht = H_.transpose();
+  const MatrixXd S = H_ * P_ * Ht + R_;
+  const MatrixXd Si = S.inverse();
+  const MatrixXd PHt = P_ * Ht;
+  const MatrixXd K = PHt * Si;
   //new estimate
   x_ = x_ + (K * y);
   long x_size = x_.size();
-  MatrixXd I = MatrixXd::Identity(x_size, x_size);
-  P_ = (I - K * H_) * P_;
+  const MatrixXd I = MatrixXd::Identity(x_size, x_size);
+  P_ -= K * H_ * P_;
 }
 
-Eigen::VectorXd KalmanFilter::getPredictedState(const std::string sensorType){
-  VectorXd z_pred;
-    if (sensorType == "RADAR"){
-        float px = x_(0);
-        float py = x_(1);
-        float vx = x_(2);
-        float vy = x_(3);
-        float rho = sqrt(px * px + py * py);
-        float phi = atan2(py,px);
+Eigen::VectorXd KalmanFilter::GetPredictedStateForRadar(){
+        VectorXd z_pred;
+        const float px = x_(0);
+        const float py = x_(1);
+        const float vx = x_(2);
+        const float vy = x_(3);
+        const float rho = sqrt(px * px + py * py);
+        const float phi = atan2(py,px);
         float rho_dot = 0;
         if(fabs(rho) >= 0.0001){
            rho_dot = (px*vx + py*vy) / rho;
         }
         z_pred = VectorXd(3);
         z_pred << rho, phi, rho_dot;
-    } else if(sensorType == "LASER"){
-        z_pred = H_ * x_;
-    }
-    return z_pred;
+        return z_pred;
+}
+
+void KalmanFilter::NormalizeAngle(double& phi)
+{
+    phi = atan2(sin(phi), cos(phi));
 }
 
